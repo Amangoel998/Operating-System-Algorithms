@@ -1,36 +1,47 @@
 #include<stdio.h>
-int n=3,m=3,i=0;
+int n=3,m=3,i=0,j;
 
 int Resource_Available[3]={3,2,2};
 int Resource_Allocated[][3]={{0,0,1},{3,2,0},{2,1,1}};
 int Process_Maximum_Need[][3]={{8,4,3},{6,2,0},{3,3,3}};
 int Process_Current_Need[3][3];
+int Safety_Sequence[3];
+bool Finish[3]={false,false,false};
 
 int *RAv,*RAl,*PMx,*PNd;
 
 void Display_Table();
-int Request_Algo(int,int *);
 int Check_Algo(int,int *);
+int Request_Algo(int,int *);
 int Safety_Algo(int,int *,bool *);
 void Calculate_Need();
 int Create_Safe_Sequence();
+void Display_Safety_Sequence();
 
 int main(){
-	int i,j;
 	printf("Welcome\n");
 	Calculate_Need();
 	Display_Table();
-	int a[]={0,0,2};
-	int *R=a;
-	Check_Algo(0,R);
-	Display_Table();
-	int b[]={2,0,0};
-	R=b;
-	Check_Algo(1,R);
+	int *R,a[3],p;
+	printf("Enter Process: 0, 1, 2\n");scanf("%d",&p);
+	printf("Enter Resources Request: ");
+	scanf("%d",a);scanf("%d",a+1);scanf("%d",a+2);
+	R=a;
+	printf("For Process P%d checking Request\n",p);
+	Check_Algo(p,R);
 	Display_Table();
 }
+int Check_Algo(int pid,int *R){
+	if(Request_Algo(pid,R)==1)Display_Table();
+	else{
+		printf("Request Not Satisfied\n");
+		return 0;
+	}
+	printf("Now Checking Safety\n");
+	if(Create_Safe_Sequence()!=0)Display_Safety_Sequence();
+	else printf("Safe Sequence is not Possible\n");
+}
 int Request_Algo(int pid,int *R){
-	int i;
 	RAv=Resource_Available;
 	RAl=Resource_Allocated[pid];
 	PNd=Process_Current_Need[pid];
@@ -38,8 +49,7 @@ int Request_Algo(int pid,int *R){
 		if(*(R+i)>*(PNd+i))return 0;
 		if(*(R+i)>*(RAv+i))return 0;
 	}
-	printf("Process %d is possible for Request: ",pid);
-	printf("<");for(i=0;i<3;i++)printf("%d,",*(R+i));printf(">\n");
+	printf("Request is possible!\n");
 	for(i=0;i<m;i++){
 		*(RAl+i)+=*(R+i);
 		*(RAv+i)-=*(R+i);
@@ -47,42 +57,46 @@ int Request_Algo(int pid,int *R){
 	}
 	return 1;
 }
-
-int Safety_Algo(int pid,int *W,bool *F){
+bool Safety_Algo(int pid){
+	printf("Possible Process to Run: P%d\n",pid);
 	RAv=Resource_Available;
 	RAl=Resource_Allocated[pid];
-	PNd=Process_Current_Need[pid];
 	for(i=0;i<3;i++){
-		*(W+i)=*(RAv+i);
-		*(F+i)=0;
+		*(RAv+i)+=*(RAl+i);
+		*(RAl+i)=0;
+		*(PNd+i)=0;
 	}
-}
-int Check_Algo(int pid,int *R){
-	if(Request_Algo(pid,R)==1){
-		printf("Request Satisfied\nChecking Safety\n");
-		if(Create_Safe_Sequence()!=0){
-			
-		}
-	}
-	else {
-		printf("Request Not Satisfied\n");
-		return 0;
-	}
+	return true;
 }
 int Create_Safe_Sequence(){
-	int i,j,Work[3];
-	bool Finish[3];
-	int Sequence[3],*Seq;
-	Seq=Sequence;
-	for(i=0;i<3;i++){
-		Work[i]=*(RAv+i);
-		Finish[i]=0;
+	int *W=Resource_Available,flag;
+	int *Seq=Safety_Sequence,k=0,g=0;
+	bool *F=Finish;
+	for(i=0;i<10;i++){
+		k=i%3;
+		if(*(F+k)==true)continue;
+		PNd=Process_Current_Need[k];
+		flag=1;
+		printf("Need:");
+		for(j=0;j<3;j++){
+			printf(" %d",*(PNd+j));
+			if(*(PNd+j)>*(W+j))flag=0;
+		}
+		printf("\n");
+		if(flag==1){
+			*(F+k)=Safety_Algo(k);
+			*(Seq+(g++))=k;
+			Display_Table();		
+		}
+		else *(F+k)=false;
+		if(*(F)&*(F+1)&*(F+2)==true)return 1;
 	}
-	for(i=0;i<3;i++){
-		Safety_Algo(i,Work,Finish);
-	}
+	return 0;
+}
+void Display_Safety_Sequence(){
+	int *Seq=Safety_Sequence,i;
 	printf("Safety Sequence:");
-	printf("<");for(i=0;i<3;i++)printf("%d,",*(Seq+j));printf(">\n");
+	printf("<");for(i=0;i<3;i++)printf("%d,",*(Seq+i));printf(">\n");
 }
 void Calculate_Need(){
 	int pid,i,j;
