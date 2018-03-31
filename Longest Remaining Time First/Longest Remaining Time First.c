@@ -1,6 +1,10 @@
 #include<stdio.h>
 #include<stdbool.h>
 #include<stdlib.h>
+/*
+	Author: Aman Goel
+	email: amangoel998@gmail.com
+*/
 typedef struct Process{
 	int Process_Id;
 	int Initial_Burst;
