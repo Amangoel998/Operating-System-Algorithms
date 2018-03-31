@@ -1,4 +1,8 @@
 #include<stdio.h>
+/*
+	Author: Aman Goel
+	email: amangel998@gmail.com
+*/
 int n=3,m=3,i=0,j;
 
 int Resource_Available[3]={3,2,2};
@@ -19,7 +23,7 @@ int Create_Safe_Sequence();
 void Display_Safety_Sequence();
 
 int main(){
-	printf("Welcome\n");
+	printf("Welcome to Aman's Program for Banker's Algorithm\n");
 	Calculate_Need();
 	Display_Table();
 	int *R,a[3],p;
